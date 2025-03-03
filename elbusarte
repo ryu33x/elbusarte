@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>El Bus Arte</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #000000;
+        color: #ffff00;
+        line-height: 1.6;
+      }
+      header {
+        background-color: #1a1a1a;
+        color: #ffff00;
+        text-align: center;
+        padding: 5vw 4vw;
+        border-bottom: 0.5vw solid #ffff00;
+        box-shadow: 0 0.8vw 2.4vw rgba(255, 255, 0, 0.1);
+      }
+      nav {
+        background-color: #333300;
+        overflow: hidden;
+        border-bottom: 0.4vw solid #ffff00;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      nav button {
+        flex: 1 1 100%;
+        color: #ffff00;
+        text-align: center;
+        padding: 3vw 4vw;
+        text-decoration: none;
+        font-size: clamp(16px, 4vw, 18px);
+        border: none;
+        background: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.2vw;
+      }
+      nav button:hover {
+        background-color: #666600;
+        text-shadow: 0 0 2.4vw #ffff00;
+      }
+      nav button.active {
+        background-color: #4d4d00;
+        font-weight: bold;
+        box-shadow: inset 0 0.8vw 1.6vw rgba(0, 0, 0, 0.3);
+      }
+      .tab-content {
+        display: none;
+        padding: 6vw 4vw;
+        text-align: center;
+        background-color: #1a1a1a;
+        min-height: 80vw;
+        border-bottom: 0.4vw solid #ffff00;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      canvas {
+        border: 0.6vw solid #ffff00;
+        background: #1a1a2a;
+        margin: 5vw auto;
+        display: block;
+        border-radius: 1.6vw;
+        box-shadow: 0 0 4vw rgba(255, 255, 0, 0.2);
+        max-width: 100%;
+        height: auto;
+      }
+      .art-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6vw;
+        margin-top: 6vw;
+      }
+      .art-item {
+        background: #333333;
+        padding: 3vw;
+        border-radius: 1.6vw;
+        border: 0.4vw solid #ffff00;
+        width: clamp(150px, 40vw, 220px);
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+      .art-item:hover {
+        transform: translateY(-1.6vw);
+        box-shadow: 0 1.6vw 4vw rgba(255, 255, 0, 0.2);
+      }
+      .art-item img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 1vw;
+        margin-bottom: 2vw;
+      }
+      a {
+        color: #ffff00;
+        text-decoration: underline;
+        font-weight: bold;
+        transition: color 0.3s ease;
+      }
+      a:hover {
+        text-decoration: none;
+        color: #ffd700;
+      }
+      h1 {
+        font-size: clamp(2em, 6vw, 2.5em);
+        margin: 0;
+        text-shadow: 0 0 3vw rgba(255, 255, 0, 0.4);
+      }
+      h2 {
+        color: #ffd700;
+        border-bottom: 0.4vw solid #ffff00;
+        padding-bottom: 3vw;
+        margin-bottom: 6vw;
+        font-size: clamp(1.5em, 5vw, 2em);
+      }
+      p {
+        margin: 3vw 0;
+        font-size: clamp(1em, 3vw, 1.1em);
+      }
+
+      @media (min-width: 768px) {
+        header {
+          padding: 30px 20px;
+        }
+        nav {
+          flex-wrap: nowrap;
+        }
+        nav button {
+          flex: 1 1 auto;
+          padding: 16px 24px;
+          font-size: 18px;
+        }
+        .tab-content {
+          padding: 30px 20px;
+          min-height: 400px;
+        }
+        canvas {
+          width: 800px;
+          height: 400px;
+        }
+        .art-item {
+          width: 220px;
+        }
+        h1 {
+          font-size: 2.5em;
+        }
+        h2 {
+          font-size: 2em;
+        }
+        p {
+          font-size: 1.1em;
+        }
+      }
+
+      @media (max-width: 767px) and (orientation: portrait) {
+        #game.tab-content.active {
+          position: relative;
+          padding: 0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+        #game.tab-content.active canvas {
+          display: block;
+        }
+        #game.tab-content.active::after {
+          content: "Por favor, gira tu dispositivo a modo horizontal para jugar.";
+          position: absolute;
+          top: 20%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: #ffff00;
+          font-size: 5vw;
+          text-align: center;
+          z-index: 1000;
+        }
+      }
+      @media (max-width: 767px) and (orientation: landscape) {
+        #game.tab-content.active {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          padding: 0;
+          margin: 0;
+          min-height: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          background-color: #1a1a1a;
+        }
+        #game.tab-content.active h2 {
+          display: none;
+        }
+        #game.tab-content.active canvas {
+          width: 100vw;
+          height: 100vh;
+          margin: 0;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        #game.tab-content.active::after {
+          content: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>El Bus Arte</h1>
+    </header>
+    <nav>
+      <button class="tablink active" onclick="openTab(event, 'welcome')">
+        Bienvenida
+      </button>
+      <button class="tablink" onclick="openTab(event, 'art')">
+        Arte y Enlaces
+      </button>
+      <button class="tablink" onclick="openTab(event, 'game')">
+        Minijuego
+      </button>
+    </nav>
+
+    <div id="welcome" class="tab-content active">
+      <h2>Bienvenidos a El Bus Arte</h2>
+      <p>
+        Explora el arte de este proyecto interactivo. Viaja en nuestro bus
+        virtual, descubre obras de arte de Colombia y disfruta de un minijuego
+        educativo donde aprenderás sobre la fauna y flora del país.
+      </p>
+    </div>
+
+    <div id="art" class="tab-content">
+      <h2>Arte</h2>
+      <p>Aquí encontrarás una selección de arte:</p>
+      <div class="art-grid"></div>
+      <p>
+        <a href="https://www.instagram.com/elbus_arte/" target="_blank"
+          >ElBus_Arte</a
+        >
+      </p>
+      <p>
+        <a href="https://www.instagram.com/guitar._art/" target="_blank"
+          >GuitarArt</a
+        >
+      </p>
+      <p>
+        <a href="https://www.instagram.com/lunaumbra1820/" target="_blank"
+          >LUNA UMBRA</a
+        >
+      </p>
+      <p>
+        <a href="https://www.instagram.com/_ryu33_/" target="_blank">Ryu33</a>
+      </p>
+    </div>
+
+    <div id="game" class="tab-content">
+      <h2>Minijuego: Viaje en Bus</h2>
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+      // Manejo de pestañas
+      function openTab(evt, tabName) {
+        const tabcontent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontent.length; i++)
+          tabcontent[i].classList.remove("active");
+        const tablinks = document.getElementsByClassName("tablink");
+        for (let i = 0; i < tablinks.length; i++)
+          tablinks[i].classList.remove("active");
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+      }
+
+      // Código del minijuego
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Constantes precalculadas
+      const PI = Math.PI;
+      const TWO_PI = PI * 2;
+      const trafficColors = [
+        "rgba(255, 0, 0, ",
+        "rgba(255, 165, 0, ",
+        "rgba(0, 255, 0, ",
+      ];
+
+      // Ajustar tamaño del canvas según pantalla
+      function resizeCanvas() {
+        canvas.width = Math.min(800, window.innerWidth * 0.9);
+        canvas.height = canvas.width * 0.5;
+        updateDynamicPositions();
+      }
+      window.addEventListener("resize", resizeCanvas);
+
+      let gameState = "start";
+      let busX = 0;
+      let busVelocity = 0;
+      const busSpeed = 50;
+      let trees = [];
+      let clouds = [];
+      let birds = [];
+      let trafficSigns = [];
+      let lastTime = null;
+      let keys = { left: false, right: false };
+      let stations = [
+        {
+          x: 0,
+          swayOffset: 0,
+          bounceOffset: 0,
+          lightTimer: 0,
+          visited: false,
+          fact: "El jaguar (Panthera onca) habita en la Amazonía colombiana y es un excelente nadador.",
+        },
+        {
+          x: 0,
+          swayOffset: 0,
+          bounceOffset: 0,
+          lightTimer: 0,
+          visited: false,
+          fact: "La Cattleya trianae, orquídea nacional, florece en los bosques nublados de Colombia.",
+        },
+        {
+          x: 0,
+          swayOffset: 0,
+          bounceOffset: 0,
+          lightTimer: 0,
+          visited: false,
+          fact: "El cóndor andino tiene una envergadura de alas de hasta 3 metros.",
+        },
+      ];
+      let currentFact = "";
+      let factTimer = 0;
+      let stoppedAtStation = false;
+
+      // Posiciones dinámicas inicializadas
+      const treePositions = [0.1, 0.3, 0.5, 0.7, 0.9];
+      const signPositions = [0.15, 0.45, 0.75];
+
+      function updateDynamicPositions() {
+        stations[0].x = canvas.width * 0.8;
+        stations[1].x = canvas.width * 0.5;
+        stations[2].x = canvas.width * 0.2;
+        trees = treePositions.map((pos) => ({
+          x: canvas.width * pos,
+          height: Math.random() * 50 + 40,
+          swayOffset: 0,
+        }));
+        clouds = Array.from({ length: 3 }, (_, i) => ({
+          x: i * (canvas.width * 0.3) + 50,
+          y: Math.random() * 60 + 20,
+          baseY: Math.random() * 60 + 20,
+          speed: Math.random() * 0.5 + 0.3,
+          floatOffset: 0,
+        }));
+        trafficSigns = signPositions.map((pos, i) => ({
+          x: canvas.width * pos,
+          lightOffset: Math.random() * 3,
+          colorIndex: i % trafficColors.length,
+        }));
+        initializeBirds();
+      }
+      resizeCanvas();
+
+      function initializeBirds() {
+        const leaderX = -50;
+        const leaderY = Math.random() * 80 + 100;
+        birds = [
+          {
+            x: leaderX,
+            y: leaderY,
+            baseY: leaderY,
+            offset: 0,
+            wingAngle: 0,
+          },
+        ];
+        for (let i = 1; i <= 3; i++) {
+          birds.push({
+            x: leaderX - i * 20,
+            y: leaderY + i * 20,
+            baseY: leaderY + i * 20,
+            offset: 0,
+            wingAngle: 0,
+          });
+          birds.push({
+            x: leaderX + i * 20,
+            y: leaderY + i * 20,
+            baseY: leaderY + i * 20,
+            offset: 0,
+            wingAngle: 0,
+          });
+        }
+      }
+
+      function drawStartScreen() {
+        ctx.fillStyle = "#1a1a2a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#FFFF00";
+        ctx.font = `bold ${canvas.width * 0.06}px Arial`;
+        ctx.textAlign = "center";
+        ctx.fillText("ElBus_Arte", canvas.width / 2, canvas.height * 0.4);
+        ctx.font = `${canvas.width * 0.03}px Arial`;
+        ctx.fillText(
+          "Usa las flechas ← y → o toca para mover el bus",
+          canvas.width / 2,
+          canvas.height * 0.55
+        );
+        ctx.fillText(
+          "Detente en las estaciones para aprender",
+          canvas.width / 2,
+          canvas.height * 0.65
+        );
+        ctx.strokeStyle = "#FFFF00";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+          canvas.width * 0.4,
+          canvas.height * 0.75,
+          canvas.width * 0.2,
+          canvas.height * 0.1
+        );
+        ctx.fillStyle = "#FFFF00";
+        ctx.font = `bold ${canvas.width * 0.03}px Arial`;
+        ctx.fillText("Iniciar", canvas.width / 2, canvas.height * 0.85);
+      }
+
+      canvas.addEventListener("click", (e) => {
+        if (gameState === "start") {
+          const rect = canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          if (
+            x >= canvas.width * 0.4 &&
+            x <= canvas.width * 0.6 &&
+            y >= canvas.height * 0.75 &&
+            y <= canvas.height * 0.85
+          ) {
+            gameState = "playing";
+          }
+        }
+      });
+
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        if (gameState === "start") {
+          if (x >= canvas.width * 0.4 && x <= canvas.width * 0.6) {
+            gameState = "playing";
+          }
+        } else if (gameState === "playing") {
+          keys.left = x < canvas.width / 2;
+          keys.right = x >= canvas.width / 2;
+        }
+      });
+
+      canvas.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        keys.left = false;
+        keys.right = false;
+      });
+
+      function drawBackground() {
+        ctx.fillStyle = "#1a1a2a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#333300";
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height * 0.75);
+        ctx.lineTo(canvas.width * 0.2, canvas.height * 0.3);
+        ctx.lineTo(canvas.width * 0.4, canvas.height * 0.5);
+        ctx.lineTo(canvas.width * 0.6, canvas.height * 0.4);
+        ctx.lineTo(canvas.width * 0.8, canvas.height * 0.55);
+        ctx.lineTo(canvas.width, canvas.height * 0.25);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.fill();
+        ctx.fillStyle = "#4d4d00";
+        ctx.fillRect(
+          0,
+          canvas.height * 0.75,
+          canvas.width,
+          canvas.height * 0.25
+        );
+        ctx.fillStyle = "#666600";
+        for (let i = 0; i < canvas.width; i += canvas.width * 0.0125) {
+          ctx.fillRect(
+            i,
+            canvas.height * 0.75,
+            canvas.width * 0.00625,
+            canvas.height * 0.025
+          );
+        }
+        trees.forEach((tree) => {
+          const sway = Math.sin(tree.swayOffset) * 5;
+          ctx.fillStyle = "#3E2723";
+          ctx.save();
+          ctx.translate(tree.x, canvas.height * 0.75);
+          ctx.rotate((sway * PI) / 180);
+          ctx.fillRect(
+            -canvas.width * 0.00625,
+            -tree.height,
+            canvas.width * 0.0125,
+            tree.height
+          );
+          ctx.restore();
+          ctx.fillStyle = "#1B5E20";
+          ctx.beginPath();
+          ctx.arc(
+            tree.x + sway,
+            canvas.height * 0.75 - tree.height - canvas.height * 0.05,
+            canvas.height * 0.05,
+            0,
+            TWO_PI
+          );
+          ctx.fill();
+        });
+        clouds.forEach((cloud) => {
+          ctx.fillStyle = "#FFFF00";
+          ctx.beginPath();
+          ctx.arc(cloud.x, cloud.y, canvas.height * 0.05, 0, TWO_PI);
+          ctx.arc(
+            cloud.x + canvas.height * 0.0625,
+            cloud.y,
+            canvas.height * 0.0375,
+            0,
+            TWO_PI
+          );
+          ctx.arc(
+            cloud.x + canvas.height * 0.025,
+            cloud.y - canvas.height * 0.025,
+            canvas.height * 0.0375,
+            0,
+            TWO_PI
+          );
+          ctx.fill();
+        });
+      }
+
+      function drawBus() {
+        ctx.fillStyle = "#FFFF00";
+        ctx.fillRect(
+          busX,
+          canvas.height * 0.675,
+          canvas.width * 0.1,
+          canvas.height * 0.075
+        );
+        ctx.fillStyle = "#FFD700";
+        ctx.fillRect(
+          busX + canvas.width * 0.00625,
+          canvas.height * 0.6625,
+          canvas.width * 0.0875,
+          canvas.height * 0.0125
+        );
+        ctx.fillStyle = "#1a1a2a";
+        for (let i = 0; i < 4; i++) {
+          ctx.fillRect(
+            busX + canvas.width * 0.0125 + i * canvas.width * 0.02125,
+            canvas.height * 0.68,
+            canvas.width * 0.015,
+            canvas.height * 0.03
+          );
+        }
+        ctx.fillStyle = "#FFFF00";
+        ctx.beginPath();
+        ctx.arc(
+          busX + canvas.width * 0.025,
+          canvas.height * 0.75,
+          canvas.height * 0.02,
+          0,
+          TWO_PI
+        );
+        ctx.arc(
+          busX + canvas.width * 0.075,
+          canvas.height * 0.75,
+          canvas.height * 0.02,
+          0,
+          TWO_PI
+        );
+        ctx.fill();
+        ctx.fillStyle = "#D81B60";
+        ctx.fillRect(
+          busX + canvas.width * 0.09375,
+          canvas.height * 0.68,
+          canvas.width * 0.00625,
+          canvas.height * 0.025
+        );
+      }
+
+      function drawStations() {
+        stations.forEach((station) => {
+          const sway = Math.sin(station.swayOffset) * 3;
+          const bounce = Math.sin(station.bounceOffset) * 2;
+          const lightIntensity = Math.sin(station.lightTimer) * 0.5 + 0.5;
+          ctx.fillStyle = "#616161";
+          ctx.fillRect(
+            station.x,
+            canvas.height * 0.6 + bounce,
+            canvas.width * 0.05,
+            canvas.height * 0.15
+          );
+          ctx.fillStyle = "#FFFF00";
+          ctx.save();
+          ctx.translate(
+            station.x + canvas.width * 0.025,
+            canvas.height * 0.6 + bounce
+          );
+          ctx.rotate((sway * PI) / 180);
+          ctx.beginPath();
+          ctx.moveTo(-canvas.width * 0.03125, 0);
+          ctx.lineTo(canvas.width * 0.03125, 0);
+          ctx.lineTo(0, -canvas.height * 0.05);
+          ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = `rgba(255, 255, 0, ${lightIntensity})`;
+          ctx.fillRect(
+            station.x + canvas.width * 0.0125,
+            canvas.height * 0.65 + bounce,
+            canvas.width * 0.025,
+            canvas.height * 0.05
+          );
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(
+            station.x + canvas.width * 0.0125,
+            canvas.height * 0.65 + bounce,
+            canvas.width * 0.025,
+            canvas.height * 0.05
+          );
+        });
+      }
+
+      function drawTrafficSigns() {
+        trafficSigns.forEach((sign) => {
+          const pulse = Math.sin(sign.lightOffset) * 0.3 + 0.7;
+          const colorCycle =
+            Math.floor(sign.lightOffset / 2) % trafficColors.length;
+          ctx.fillStyle = "#666600";
+          ctx.fillRect(
+            sign.x - canvas.width * 0.0025,
+            canvas.height * 0.65,
+            canvas.width * 0.005,
+            canvas.height * 0.1
+          );
+          ctx.fillStyle = `${trafficColors[colorCycle]}${pulse})`;
+          ctx.beginPath();
+          ctx.arc(
+            sign.x,
+            canvas.height * 0.625,
+            canvas.height * 0.02,
+            0,
+            TWO_PI
+          );
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(
+            sign.x,
+            canvas.height * 0.625,
+            canvas.height * 0.025,
+            0,
+            TWO_PI
+          );
+          ctx.fillStyle = `${trafficColors[colorCycle]}0.3)`;
+          ctx.fill();
+          ctx.strokeStyle = "#FFFF00";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(
+            sign.x,
+            canvas.height * 0.625,
+            canvas.height * 0.02,
+            0,
+            TWO_PI
+          );
+          ctx.stroke();
+        });
+      }
+
+      function drawBirds() {
+        birds.forEach((bird) => {
+          ctx.fillStyle = "#FFFF00";
+          ctx.save();
+          ctx.translate(bird.x, bird.y);
+          const wingOffset = Math.sin(bird.wingAngle) * 5;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(-canvas.width * 0.01, canvas.height * 0.0125 + wingOffset);
+          ctx.lineTo(canvas.width * 0.01, canvas.height * 0.0125 - wingOffset);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      function drawDialog() {
+        if (currentFact) {
+          ctx.fillStyle = "rgba(26, 26, 26, 0.95)";
+          ctx.fillRect(
+            canvas.width * 0.25,
+            canvas.height * 0.125,
+            canvas.width * 0.5,
+            canvas.height * 0.25
+          );
+          ctx.strokeStyle = "#FFFF00";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(
+            canvas.width * 0.25,
+            canvas.height * 0.125,
+            canvas.width * 0.5,
+            canvas.height * 0.25
+          );
+          ctx.fillStyle = "#FFFF00";
+          ctx.font = `${canvas.width * 0.02}px Arial`;
+          ctx.textAlign = "center";
+          const wrappedText = wrapText(currentFact, canvas.width * 0.475);
+          wrappedText.forEach((line, index) => {
+            ctx.fillText(
+              line,
+              canvas.width / 2,
+              canvas.height * 0.2 + index * canvas.height * 0.05
+            );
+          });
+        }
+      }
+
+      function wrapText(text, maxWidth) {
+        const words = text.split(" ");
+        let lines = [];
+        let currentLine = words[0];
+        for (let i = 1; i < words.length; i++) {
+          const testLine = currentLine + " " + words[i];
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width <= maxWidth) {
+            currentLine = testLine;
+          } else {
+            lines.push(currentLine);
+            currentLine = words[i];
+          }
+        }
+        lines.push(currentLine);
+        return lines;
+      }
+
+      function showInfo(deltaTime) {
+        const nearStation = stations.find(
+          (station) =>
+            busX >= station.x - canvas.width * 0.1 &&
+            busX <= station.x + canvas.width * 0.05 &&
+            !station.visited
+        );
+
+        if (nearStation && busVelocity === 0 && !stoppedAtStation) {
+          stoppedAtStation = true;
+          nearStation.visited = true;
+          currentFact = nearStation.fact; // Mostrar el mensaje específico de la estación
+          factTimer = 3;
+        }
+
+        if (factTimer > 0) {
+          factTimer -= deltaTime;
+          if (factTimer <= 0) {
+            currentFact = "";
+            stoppedAtStation = false;
+          }
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (gameState === "playing") {
+          keys.right = e.key === "ArrowRight";
+          keys.left = e.key === "ArrowLeft";
+        }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        if (gameState === "playing") {
+          if (e.key === "ArrowRight") keys.right = false;
+          if (e.key === "ArrowLeft") keys.left = false;
+        }
+      });
+
+      const birdSpeed = 1;
+      function gameLoop(timestamp) {
+        if (lastTime === null) lastTime = timestamp;
+        const deltaTime = Math.min((timestamp - lastTime) / 1000, 0.1); // Limitar deltaTime a 100ms
+        lastTime = timestamp;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (gameState === "start") {
+          drawStartScreen();
+        } else if (gameState === "playing") {
+          drawBackground();
+          drawStations();
+          drawTrafficSigns();
+          drawBus();
+          drawBirds();
+          showInfo(deltaTime);
+          drawDialog();
+
+          clouds.forEach((cloud) => {
+            cloud.x += cloud.speed * deltaTime;
+            cloud.floatOffset += deltaTime;
+            cloud.y = cloud.baseY + Math.sin(cloud.floatOffset) * 5;
+            if (cloud.x > canvas.width) cloud.x = -canvas.width * 0.075;
+          });
+
+          birds.forEach((bird, index) => {
+            bird.x += birdSpeed * deltaTime;
+            bird.offset += deltaTime * 2;
+            bird.y = bird.baseY + Math.sin(bird.offset + index * 0.5) * 5;
+            bird.wingAngle += deltaTime * 10;
+          });
+          if (birds[0].x > canvas.width) initializeBirds();
+
+          trees.forEach(
+            (tree, index) => (tree.swayOffset += deltaTime * (1 + index * 0.2))
+          );
+          stations.forEach((station, index) => {
+            station.swayOffset += deltaTime * (1.5 + index * 0.3);
+            station.bounceOffset += deltaTime * (2 + index * 0.4);
+            station.lightTimer += deltaTime * (3 + index * 0.5);
+          });
+          trafficSigns.forEach(
+            (sign, index) =>
+              (sign.lightOffset += deltaTime * (1.5 + index * 0.2))
+          );
+
+          busVelocity = keys.right ? busSpeed : keys.left ? -busSpeed : 0;
+          busX += busVelocity * deltaTime;
+          if (busX > canvas.width) busX = -canvas.width * 0.1;
+          if (busX < -canvas.width * 0.1) busX = canvas.width;
+        }
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      requestAnimationFrame(gameLoop);
+    </script>
+  </body>
+</html>
