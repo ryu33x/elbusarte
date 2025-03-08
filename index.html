@@ -242,7 +242,6 @@
     </style>
 </head>
 <body>
-    <!-- Canvas para la animación de partículas -->
     <canvas id="particleCanvas"></canvas>
 
     <header>
@@ -300,6 +299,12 @@
         const BUS_HEIGHT = 0.075; // Proporción de la altura del canvas
         const TRAFFIC_COLORS = ["rgba(255, 0, 0, ", "rgba(255, 165, 0, ", "rgba(0, 255, 0, "];
 
+        // **NUEVO: Variable para el puntaje/distancia**
+        let score = 0;
+
+        // **NUEVO: Arreglo para los obstáculos**
+        let obstacles = [];
+
         // Estado del juego
         let gameState = "start";
         let busX = 0;
@@ -314,11 +319,21 @@
         let stations = [
             { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "El jaguar (Panthera onca) habita en la Amazonía colombiana y es un excelente nadador." },
             { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "La Cattleya trianae, orquídea nacional, florece en los bosques nublados de Colombia." },
-            { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "El cóndor andino tiene una envergadura de alas de hasta 3 metros." }
+            { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "El cóndor andino tiene una envergadura de alas de hasta 3 metros." },
+            // **NUEVO: Añadimos más facts a las estaciones existentes y podríamos añadir más estaciones completas si quisiéramos**
+            { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "El oso de anteojos es el único oso nativo de Sudamérica." },
+            { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "Colombia es el país con mayor diversidad de aves en el mundo." },
+            { x: 0, swayOffset: 0, bounceOffset: 0, lightTimer: 0, visited: false, fact: "La palma de cera del Quindío es el árbol nacional de Colombia y puede vivir más de 100 años." }
         ];
         let currentFact = "";
         let factTimer = 0;
         let stoppedAtStation = false;
+
+        // **NUEVO: Variables para el efecto de temblor al colisionar**
+        let shakeIntensity = 0;
+        let shakeDuration = 0;
+        let busShakeOffsetX = 0;
+        let busShakeOffsetY = 0;
 
         // Posiciones iniciales
         const treePositions = [0.1, 0.3, 0.5, 0.7, 0.9];
@@ -392,9 +407,17 @@
                 station.bounceOffset += deltaTime * (2 + i * 0.4);
                 station.lightTimer += deltaTime * (3 + i * 0.5);
             });
-            trafficSigns.forEach((sign, i) => sign.lightOffset += deltaTime * (1.5 + i * 0.2));
+            trafficSigns.forEach((sign, i) => sign.lightOffset += deltaTime * (0.7 + i * 0.1)); // **LINEA MODIFICADA - Semáforos duran un poco más**
 
-            // Actualizar bus
+            // **NUEVO: Incremento del puntaje (distancia recorrida)**
+            if (busVelocity !== 0) {
+                score += Math.abs(busVelocity) * deltaTime * 0.1; // Ajusta el multiplicador para la velocidad del puntaje
+            }
+
+            // **NUEVO: Actualizar obstáculos**
+            updateObstacles(deltaTime);
+
+            // Actualizar bus (existente)
             busVelocity = keys.right ? busSpeed : keys.left ? -busSpeed : 0;
             busX += busVelocity * deltaTime;
             if (busX > gameCanvas.width) busX = -gameCanvas.width * BUS_WIDTH;
@@ -411,7 +434,55 @@
                 });
             }
 
+            // **NUEVO: Actualizar efecto de temblor**
+            if (shakeDuration > 0) {
+                shakeDuration -= deltaTime;
+                busShakeOffsetX = (Math.random() - 0.5) * shakeIntensity;
+                busShakeOffsetY = (Math.random() - 0.5) * shakeIntensity;
+                shakeIntensity *= 0.95; // Amortiguar el temblor
+            } else {
+                busShakeOffsetX = 0;
+                busShakeOffsetY = 0;
+            }
+
+
             showInfo(deltaTime);
+        }
+
+
+        // **NUEVO: Función para actualizar obstáculos**
+        function updateObstacles(deltaTime) {
+            if (obstacles.length < 3 && Math.random() < 0.01) { // Generar nuevos obstáculos aleatoriamente
+                obstacles.push({
+                    x: gameCanvas.width + Math.random() * gameCanvas.width * 0.2, // Aparecen desde la derecha
+                    y: gameCanvas.height * 0.75, // En la carretera
+                    size: Math.random() * gameCanvas.width * 0.03 + gameCanvas.width * 0.02, // Tamaño aleatorio
+                    type: Math.random() < 0.5 ? 'rock' : 'animal' // Tipo aleatorio (puedes expandir esto)
+                });
+            }
+
+            obstacles.forEach(obstacle => {
+                obstacle.x -= busSpeed * deltaTime; // Se mueven hacia la izquierda (hacia el bus)
+                if (obstacle.x < -obstacle.size) { // Eliminar obstáculos que salen de la pantalla
+                    obstacles.shift(); // Eliminar el primer elemento del array (el más viejo)
+                }
+
+                // **Detección de colisión** (simple, basado en distancia al centro del bus)
+                const busCenterX = busX + gameCanvas.width * BUS_WIDTH / 2;
+                const obstacleCenterX = obstacle.x + obstacle.size / 2;
+                const distance = Math.abs(busCenterX - obstacleCenterX);
+                const collisionDistance = gameCanvas.width * BUS_WIDTH / 2 + obstacle.size / 2; // Suma de radios aproximados
+
+                if (distance < collisionDistance) {
+                    // **Acción al colisionar:**
+                    shakeIntensity = 5; // Iniciar temblor
+                    shakeDuration = 0.2; // Duración del temblor en segundos
+                    obstacles = obstacles.filter(o => o !== obstacle); // Eliminar el obstáculo colisionado
+
+                    console.log("¡Colisión!"); // Opcional: para debugging
+                    // Aquí podrías añadir penalizaciones, sonidos, etc.
+                }
+            });
         }
 
         // Funciones de dibujo del minijuego
@@ -423,9 +494,13 @@
                 drawBackground();
                 drawStations();
                 drawTrafficSigns();
+                // **NUEVO: Dibujar obstáculos**
+                drawObstacles();
                 drawBus();
                 drawBirds();
                 drawDialog();
+                // **NUEVO: Mostrar el puntaje**
+                drawScore();
             }
         }
 
@@ -492,20 +567,21 @@
 
         function drawBus() {
             gameCtx.fillStyle = "#FFFF00";
-            gameCtx.fillRect(busX, gameCanvas.height * 0.675, gameCanvas.width * BUS_WIDTH, gameCanvas.height * BUS_HEIGHT);
+            // **MODIFICADO: Aplicar temblor al dibujar el bus**
+            gameCtx.fillRect(busX + busShakeOffsetX, gameCanvas.height * 0.675 + busShakeOffsetY, gameCanvas.width * BUS_WIDTH, gameCanvas.height * BUS_HEIGHT);
             gameCtx.fillStyle = "#FFD700";
-            gameCtx.fillRect(busX + gameCanvas.width * 0.00625, gameCanvas.height * 0.6625, gameCanvas.width * 0.0875, gameCanvas.height * 0.0125);
+            gameCtx.fillRect(busX + gameCanvas.width * 0.00625 + busShakeOffsetX, gameCanvas.height * 0.6625 + busShakeOffsetY, gameCanvas.width * 0.0875, gameCanvas.height * 0.0125);
             gameCtx.fillStyle = "#1a1a2a";
             for (let i = 0; i < 4; i++) {
-                gameCtx.fillRect(busX + gameCanvas.width * 0.0125 + i * gameCanvas.width * 0.02125, gameCanvas.height * 0.68, gameCanvas.width * 0.015, gameCanvas.height * 0.03);
+                gameCtx.fillRect(busX + gameCanvas.width * 0.0125 + i * gameCanvas.width * 0.02125 + busShakeOffsetX, gameCanvas.height * 0.68 + busShakeOffsetY, gameCanvas.width * 0.015, gameCanvas.height * 0.03);
             }
             gameCtx.fillStyle = "#FFFF00";
             gameCtx.beginPath();
-            gameCtx.arc(busX + gameCanvas.width * 0.025, gameCanvas.height * 0.75, gameCanvas.height * 0.02, 0, TWO_PI);
-            gameCtx.arc(busX + gameCanvas.width * 0.075, gameCanvas.height * 0.75, gameCanvas.height * 0.02, 0, TWO_PI);
+            gameCtx.arc(busX + gameCanvas.width * 0.025 + busShakeOffsetX, gameCanvas.height * 0.75 + busShakeOffsetY, gameCanvas.height * 0.02, 0, TWO_PI);
+            gameCtx.arc(busX + gameCanvas.width * 0.075 + busShakeOffsetX, gameCanvas.height * 0.75 + busShakeOffsetY, gameCanvas.height * 0.02, 0, TWO_PI);
             gameCtx.fill();
             gameCtx.fillStyle = "#D81B60";
-            gameCtx.fillRect(busX + gameCanvas.width * 0.09375, gameCanvas.height * 0.68, gameCanvas.width * 0.00625, gameCanvas.height * 0.025);
+            gameCtx.fillRect(busX + gameCanvas.width * 0.09375 + busShakeOffsetX, gameCanvas.height * 0.68 + busShakeOffsetY, gameCanvas.width * 0.00625, gameCanvas.height * 0.025);
         }
 
         function drawStations() {
@@ -588,6 +664,31 @@
             }
         }
 
+        // **NUEVO: Función para dibujar obstáculos**
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                gameCtx.fillStyle = obstacle.type === 'rock' ? '#777' : '#A0522D'; // Color según el tipo
+                gameCtx.beginPath();
+                gameCtx.arc(obstacle.x, obstacle.y, obstacle.size, 0, TWO_PI);
+                gameCtx.fill();
+                if (obstacle.type === 'animal') { // Ejemplo simple de "animal" como un círculo más pequeño encima
+                    gameCtx.fillStyle = '#D2B48C';
+                    gameCtx.beginPath();
+                    gameCtx.arc(obstacle.x, obstacle.y - obstacle.size * 0.6, obstacle.size * 0.4, 0, TWO_PI);
+                    gameCtx.fill();
+                }
+            });
+        }
+
+        // **NUEVO: Función para dibujar el puntaje**
+        function drawScore() {
+            gameCtx.fillStyle = "#FFFF00";
+            gameCtx.font = `${gameCanvas.width * 0.03}px Arial`;
+            gameCtx.textAlign = "left";
+            gameCtx.fillText(`Puntaje: ${Math.floor(score)}`, gameCanvas.width * 0.02, gameCanvas.height * 0.05); // Mostrar puntaje arriba a la izquierda
+        }
+
+
         function wrapText(text, maxWidth) {
             const words = text.split(" ");
             let lines = [];
@@ -617,7 +718,7 @@
                 stoppedAtStation = true;
                 nearStation.visited = true;
                 currentFact = nearStation.fact;
-                factTimer = 3;
+                factTimer = 8; // **LINEA MODIFICADA - Carteles informativos duran 8 segundos**
             }
 
             if (factTimer > 0) {
