@@ -1,275 +1,258 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>El Bus Arte</title>
     <style>
-      body {
-        font-family: "Arial", sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #000000;
-        color: #ffff00;
-        line-height: 1.6;
-      }
-      header {
-        background-color: #1a1a1a;
-        color: #ffff00;
-        text-align: center;
-        padding: 5vw 4vw;
-        border-bottom: 0.5vw solid #ffff00;
-        box-shadow: 0 0.8vw 2.4vw rgba(255, 255, 0, 0.1);
-      }
-      nav {
-        background-color: #333300;
-        overflow: hidden;
-        border-bottom: 0.4vw solid #ffff00;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      nav button {
-        flex: 1 1 100%;
-        color: #ffff00;
-        text-align: center;
-        padding: 3vw 4vw;
-        text-decoration: none;
-        font-size: clamp(16px, 4vw, 18px);
-        border: none;
-        background: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.2vw;
-      }
-      nav button:hover {
-        background-color: #666600;
-        text-shadow: 0 0 2.4vw #ffff00;
-      }
-      nav button.active {
-        background-color: #4d4d00;
-        font-weight: bold;
-        box-shadow: inset 0 0.8vw 1.6vw rgba(0, 0, 0, 0.3);
-      }
-      .tab-content {
-        display: none;
-        padding: 6vw 4vw;
-        text-align: center;
-        background-color: #1a1a1a;
-        min-height: 80vw;
-        border-bottom: 0.4vw solid #ffff00;
-      }
-      .tab-content.active {
-        display: block;
-      }
-      canvas {
-        border: 0.6vw solid #ffff00;
-        background: #1a1a2a;
-        margin: 5vw auto;
-        display: block;
-        border-radius: 1.6vw;
-        box-shadow: 0 0 4vw rgba(255, 255, 0, 0.2);
-        max-width: 100%;
-        height: auto;
-      }
-      .art-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 6vw;
-        margin-top: 6vw;
-      }
-      .art-item {
-        background: #333333;
-        padding: 3vw;
-        border-radius: 1.6vw;
-        border: 0.4vw solid #ffff00;
-        width: clamp(150px, 40vw, 220px);
-        text-align: center;
-        transition: all 0.3s ease;
-      }
-      .art-item:hover {
-        transform: translateY(-1.6vw);
-        box-shadow: 0 1.6vw 4vw rgba(255, 255, 0, 0.2);
-      }
-      .art-item img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 1vw;
-        margin-bottom: 2vw;
-      }
-      a {
-        color: #ffff00;
-        text-decoration: underline;
-        font-weight: bold;
-        transition: color 0.3s ease;
-      }
-      a:hover {
-        text-decoration: none;
-        color: #ffd700;
-      }
-      h1 {
-        font-size: clamp(2em, 6vw, 2.5em);
-        margin: 0;
-        text-shadow: 0 0 3vw rgba(255, 255, 0, 0.4);
-      }
-      h2 {
-        color: #ffd700;
-        border-bottom: 0.4vw solid #ffff00;
-        padding-bottom: 3vw;
-        margin-bottom: 6vw;
-        font-size: clamp(1.5em, 5vw, 2em);
-      }
-      p {
-        margin: 3vw 0;
-        font-size: clamp(1em, 3vw, 1.1em);
-      }
+        /* Estilos generales */
+        body {
+            font-family: "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #ffff00;
+            line-height: 1.6;
+        }
 
-      @media (min-width: 768px) {
+        /* Encabezado */
         header {
-          padding: 30px 20px;
+            background-color: #1a1a1a;
+            color: #ffff00;
+            text-align: center;
+            padding: 5vw 4vw;
+            border-bottom: 0.5vw solid #ffff00;
+            box-shadow: 0 0.8vw 2.4vw rgba(255, 255, 0, 0.1);
         }
-        nav {
-          flex-wrap: nowrap;
-        }
-        nav button {
-          flex: 1 1 auto;
-          padding: 16px 24px;
-          font-size: 18px;
-        }
-        .tab-content {
-          padding: 30px 20px;
-          min-height: 400px;
-        }
-        canvas {
-          width: 800px;
-          height: 400px;
-        }
-        .art-item {
-          width: 220px;
-        }
-        h1 {
-          font-size: 2.5em;
-        }
-        h2 {
-          font-size: 2em;
-        }
-        p {
-          font-size: 1.1em;
-        }
-      }
 
-      @media (max-width: 767px) and (orientation: portrait) {
-        #game.tab-content.active {
-          position: relative;
-          padding: 0;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
+        /* Navegación */
+        nav {
+            background-color: #333300;
+            border-bottom: 0.4vw solid #ffff00;
+            display: flex;
+            justify-content: center;
         }
-        #game.tab-content.active canvas {
-          display: block;
+
+        .nav-list {
+            display: flex;
+            flex-wrap: wrap;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
-        #game.tab-content.active::after {
-          content: "Por favor, gira tu dispositivo a modo horizontal para jugar.";
-          position: absolute;
-          top: 20%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: #ffff00;
-          font-size: 5vw;
-          text-align: center;
-          z-index: 1000;
+
+        nav button {
+            flex: 1 1 100%;
+            color: #ffff00;
+            padding: 3vw 4vw;
+            font-size: clamp(16px, 4vw, 18px);
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.2vw;
+            text-align: center;
         }
-      }
-      @media (max-width: 767px) and (orientation: landscape) {
-        #game.tab-content.active {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          padding: 0;
-          margin: 0;
-          min-height: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          background-color: #1a1a1a;
+
+        nav button:hover {
+            background-color: #666600;
+            text-shadow: 0 0 2.4vw #ffff00;
         }
-        #game.tab-content.active h2 {
-          display: none;
+
+        nav button.active {
+            background-color: #4d4d00;
+            font-weight: bold;
+            box-shadow: inset 0 0.8vw 1.6vw rgba(0, 0, 0, 0.3);
         }
-        #game.tab-content.active canvas {
-          width: 100vw;
-          height: 100vh;
-          margin: 0;
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
+
+        /* Contenido de pestañas */
+        .tab-content {
+            display: none;
+            padding: 6vw 4vw;
+            text-align: center;
+            background-color: #1a1a1a;
+            min-height: 80vw;
+            border-bottom: 0.4vw solid #ffff00;
         }
-        #game.tab-content.active::after {
-          content: none;
+
+        .tab-content.active {
+            display: block;
         }
-      }
+
+        /* Canvas del minijuego */
+        canvas {
+            border: 0.6vw solid #ffff00;
+            background: #1a1a2a;
+            margin: 5vw auto;
+            display: block;
+            border-radius: 1.6vw;
+            box-shadow: 0 0 4vw rgba(255, 255, 0, 0.2);
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Grid de arte */
+        .art-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6vw;
+            margin-top: 6vw;
+        }
+
+        .art-item {
+            background: #333333;
+            padding: 3vw;
+            border-radius: 1.6vw;
+            border: 0.4vw solid #ffff00;
+            width: clamp(150px, 40vw, 220px);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .art-item:hover {
+            transform: translateY(-1.6vw);
+            box-shadow: 0 1.6vw 4vw rgba(255, 255, 0, 0.2);
+        }
+
+        .art-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1vw;
+            margin-bottom: 2vw;
+        }
+
+        /* Enlaces */
+        a {
+            color: #ffff00;
+            text-decoration: underline;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            text-decoration: none;
+            color: #ffd700;
+        }
+
+        /* Tipografía */
+        h1 {
+            font-size: clamp(2em, 6vw, 2.5em);
+            margin: 0;
+            text-shadow: 0 0 3vw rgba(255, 255, 0, 0.4);
+        }
+
+        h2 {
+            color: #ffd700;
+            border-bottom: 0.4vw solid #ffff00;
+            padding-bottom: 3vw;
+            margin-bottom: 6vw;
+            font-size: clamp(1.5em, 5vw, 2em);
+        }
+
+        p {
+            margin: 3vw 0;
+            font-size: clamp(1em, 3vw, 1.1em);
+        }
+
+        /* Media Queries */
+        @media (min-width: 768px) {
+            header { padding: 30px 20px; }
+            .nav-list { flex-wrap: nowrap; }
+            nav button { flex: 1 1 auto; padding: 16px 24px; font-size: 18px; }
+            .tab-content { padding: 30px 20px; min-height: 400px; }
+            canvas { width: 800px; height: 400px; }
+            .art-item { width: 220px; }
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            p { font-size: 1.1em; }
+        }
+
+        @media (max-width: 767px) and (orientation: portrait) {
+            #game.tab-content.active {
+                position: relative;
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            #game.tab-content.active canvas { display: none; }
+            #game.tab-content.active::after {
+                content: "Por favor, gira tu dispositivo a modo horizontal para jugar.";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #FFFF00;
+                font-size: 5vw;
+                text-align: center;
+                z-index: 1000;
+            }
+        }
+
+        @media (max-width: 767px) and (orientation: landscape) {
+            #game.tab-content.active {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                padding: 0;
+                margin: 0;
+                min-height: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                background-color: #1a1a1a;
+            }
+            #game.tab-content.active h2 { display: none; }
+            #game.tab-content.active canvas {
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <header>
-      <h1>El Bus Arte</h1>
+        <h1>El Bus Arte</h1>
     </header>
     <nav>
-      <button class="tablink active" onclick="openTab(event, 'welcome')">
-        Bienvenida
-      </button>
-      <button class="tablink" onclick="openTab(event, 'art')">
-        Arte y Enlaces
-      </button>
-      <button class="tablink" onclick="openTab(event, 'game')">
-        Minijuego
-      </button>
+        <ul class="nav-list">
+            <li><button class="tablink active" onclick="openTab(event, 'welcome')" aria-label="Abrir pestaña Bienvenida">Bienvenida</button></li>
+            <li><button class="tablink" onclick="openTab(event, 'art')" aria-label="Abrir pestaña Arte y Enlaces">Arte y Enlaces</button></li>
+            <li><button class="tablink" onclick="openTab(event, 'game')" aria-label="Abrir pestaña Minijuego">Minijuego</button></li>
+        </ul>
     </nav>
 
     <div id="welcome" class="tab-content active">
-      <h2>Bienvenidos a El Bus Arte</h2>
-      <p>
-        Explora el arte de este proyecto interactivo. Viaja en nuestro bus
-        virtual, descubre obras de arte de Colombia y disfruta de un minijuego
-        educativo donde aprenderás sobre la fauna y flora del país.
-      </p>
+        <h2>Bienvenidos a El Bus Arte</h2>
+        <p>
+            Explora el arte de este proyecto interactivo. Viaja en nuestro bus virtual, descubre obras de arte de Colombia y disfruta de un minijuego educativo donde aprenderás sobre la fauna y flora del país.
+        </p>
     </div>
 
     <div id="art" class="tab-content">
-      <h2>Arte</h2>
-      <p>Aquí encontrarás una selección de arte:</p>
-      <div class="art-grid"></div>
-      <p>
-        <a href="https://www.instagram.com/elbus_arte/" target="_blank"
-          >ElBus_Arte</a
-        >
-      </p>
-      <p>
-        <a href="https://www.instagram.com/guitar._art/" target="_blank"
-          >GuitarArt</a
-        >
-      </p>
-      <p>
-        <a href="https://www.instagram.com/lunaumbra1820/" target="_blank"
-          >LUNA UMBRA</a
-        >
-      </p>
-      <p>
-        <a href="https://www.instagram.com/_ryu33_/" target="_blank">Ryu33</a>
-      </p>
+        <h2>Arte</h2>
+        <p>Aquí encontrarás una selección de arte:</p>
+        <div class="art-grid"></div>
+        <p><a href="https://www.instagram.com/guitar._art/" target="_blank">GuitarArt</a></p>
+        <p><a href="https://www.instagram.com/elbus_arte/" target="_blank">ElBus_Arte</a></p>
+        <p><a href="https://www.instagram.com/_ryu33_/" target="_blank">Ryu33</a></p>
     </div>
 
     <div id="game" class="tab-content">
-      <h2>Minijuego: Viaje en Bus</h2>
-      <canvas id="gameCanvas"></canvas>
+        <h2>Minijuego: Viaje en Bus</h2>
+        <canvas id="gameCanvas"></canvas>
     </div>
 
     <script>
@@ -699,5 +682,5 @@
 
         requestAnimationFrame(gameLoop);
     </script>
-  </body>
+</body>
 </html>
